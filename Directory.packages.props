@@ -1,0 +1,31 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.Headless" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.Themes.Simple" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.0.10" />
+    <PackageVersion Include="coverlet.collector" Version="6.0" />
+    <PackageVersion Include="Dotnet.Bundle" Version="0.9.13" />
+    <PackageVersion Include="DynamicData" Version="8.4.1" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="Material.Icons" Version="2.1.9" />
+    <PackageVersion Include="Material.Icons.Avalonia" Version="2.1.9" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="NSubstitute" Version="5.1.0" />
+    <PackageVersion Include="ReactiveUI" Version="19.6.1" />
+    <PackageVersion Include="ReactiveUI.Validation" Version="3.1.7" />
+    <PackageVersion Include="sqlite-net-sqlcipher" Version="1.9.172" />
+    <PackageVersion Include="xunit" Version="2.7.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
+  </ItemGroup>
+</Project>
