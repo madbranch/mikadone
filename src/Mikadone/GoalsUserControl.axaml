@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="Mikadone.GoalsUserControl"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mikadone="using:Mikadone"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:DataType="mikadone:GoalsViewModel"
+             mc:Ignorable="d">
+  <TreeView ItemsSource="{Binding Root.Prerequisites}" FontSize="14">
+    <TreeView.ItemTemplate>
+      <TreeDataTemplate DataType="{x:Type mikadone:Goal}" ItemsSource="{Binding Prerequisites}">
+        <StackPanel Orientation="Horizontal">
+          <CheckBox IsChecked="{Binding IsReached}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding Description}" VerticalAlignment="Center" />
+        </StackPanel>
+      </TreeDataTemplate>
+    </TreeView.ItemTemplate>
+  </TreeView>
+</UserControl>
