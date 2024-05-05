@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
 using ReactiveUI;
 
 namespace Mikadone;
 
-public class Goal : ReactiveObject, IEditableObject
+public sealed class Goal : ReactiveObject, IEditableObject
 {
   private bool _isReached;
-  private string _description = string.Empty;
+  private string _description;
   private readonly SourceList<Goal> _prerequisitesSource = new();
   private readonly ReadOnlyObservableCollection<Goal> _prerequisites;
   private Goal? _parent;
@@ -19,7 +20,16 @@ public class Goal : ReactiveObject, IEditableObject
   private bool _isEditing;
 
   public Goal()
+    : this(false, string.Empty, [])
   {
+  }
+
+  public Goal(bool isReached, string description, IEnumerable<Goal> prerequisites)
+  {
+    _isReached = isReached;
+    _description = description;
+    _prerequisitesSource.AddRange(prerequisites);
+
     _ = _prerequisitesSource
       .Connect()
       .ObserveOn(RxApp.MainThreadScheduler)
@@ -78,6 +88,27 @@ public class Goal : ReactiveObject, IEditableObject
 
   public override string ToString()
     => $"[{XIfTrue(IsReached)}] {Description}";
+
+  public override bool Equals(object? obj)
+    => obj is Goal other
+    && IsReached == other.IsReached
+    && Description == other.Description
+    && Prerequisites.SequenceEqual(other.Prerequisites);
+
+  public override int GetHashCode()
+  {
+    HashCode hash = new();
+
+    hash.Add(IsEditing);
+    hash.Add(Description);
+
+    foreach(Goal prerequisite in Prerequisites)
+    {
+      hash.Add(prerequisite);
+    }
+
+    return hash.ToHashCode();
+  }
 
   private static char XIfTrue(bool value)
     => value ? 'x' : ' ';

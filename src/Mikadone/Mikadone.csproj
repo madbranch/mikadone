@@ -20,6 +20,7 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
     <PackageReference Include="Avalonia.ReactiveUI" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
   <Target Name="Format XAML" AfterTargets="BeforeBuild">
     <Exec Command="dotnet tool restore" />

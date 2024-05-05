@@ -1,21 +1,21 @@
 ﻿<UserControl x:Class="Mikadone.GoalsUserControl"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mikadone="using:Mikadone"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mikadone="using:Mikadone"
              x:DataType="mikadone:GoalsViewModel"
              mc:Ignorable="d">
-  <TreeView ItemsSource="{Binding Root.Prerequisites}" SelectedItem="{Binding SelectedGoal}" KeyDown="TreeView_KeyDown">
+  <TreeView ItemsSource="{Binding Root.Prerequisites}" KeyDown="TreeView_KeyDown" SelectedItem="{Binding SelectedGoal}">
     <TreeView.ItemTemplate>
       <TreeDataTemplate DataType="{x:Type mikadone:Goal}" ItemsSource="{Binding Prerequisites}">
         <StackPanel Orientation="Horizontal">
           <CheckBox IsChecked="{Binding IsReached}" VerticalAlignment="Center" />
-          <TextBlock Text="{Binding Description}" IsVisible="{Binding !IsEditing}" VerticalAlignment="Center" />
-          <TextBox Text="{Binding Description}"
-                   IsVisible="{Binding IsEditing}"
+          <TextBlock IsVisible="{Binding !IsEditing}" Text="{Binding Description}" VerticalAlignment="Center" />
+          <TextBox IsVisible="{Binding IsEditing}"
+                   KeyDown="TextBox_KeyDown"
                    PropertyChanged="TextBox_PropertyChanged"
-                   KeyDown="TextBox_KeyDown" />
+                   Text="{Binding Description}" />
         </StackPanel>
       </TreeDataTemplate>
     </TreeView.ItemTemplate>
