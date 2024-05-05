@@ -103,6 +103,7 @@ public class Goal : ReactiveObject, IEditableObject
 
     IsEditing = false;
     Description = _originalDescription;
+    _originalDescription = null;
   }
 
   public void EndEdit()
