@@ -11,7 +11,11 @@
       <TreeDataTemplate DataType="{x:Type mikadone:Goal}" ItemsSource="{Binding Prerequisites}">
         <StackPanel Orientation="Horizontal">
           <CheckBox IsChecked="{Binding IsReached}" VerticalAlignment="Center" />
-          <TextBlock Text="{Binding Description}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding Description}" IsVisible="{Binding !IsEditing}" VerticalAlignment="Center" />
+          <TextBox Text="{Binding Description}"
+                   IsVisible="{Binding IsEditing}"
+                   PropertyChanged="TextBox_PropertyChanged"
+                   KeyDown="TextBox_KeyDown" />
         </StackPanel>
       </TreeDataTemplate>
     </TreeView.ItemTemplate>

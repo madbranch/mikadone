@@ -1,11 +1,39 @@
+using System.ComponentModel;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.LogicalTree;
 
 namespace Mikadone;
 
 public partial class GoalsUserControl : UserControl
 {
   public GoalsUserControl() => InitializeComponent();
+
+  private void TextBox_KeyDown(object? sender, KeyEventArgs e)
+  {
+    if (e.Key == Key.Enter
+      && sender is TextBox textBox
+      && textBox.DataContext is Goal goal)
+    {
+      goal.EndEdit();
+      textBox.GetLogicalAncestors().OfType<TreeViewItem>().FirstOrDefault()?.Focus();
+      e.Handled = true;
+    }
+  }
+
+  private void TextBox_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+  {
+    if (e.Property != IsVisibleProperty
+      || sender is not TextBox textBox)
+    {
+      return;
+    }
+
+    textBox.Focus();
+    textBox.SelectAll();
+  }
 
   private void TreeView_KeyDown(object? sender, KeyEventArgs e)
   {
