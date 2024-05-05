@@ -13,11 +13,21 @@ public partial class GoalsUserControl : UserControl
 
   private void TextBox_KeyDown(object? sender, KeyEventArgs e)
   {
-    if (e.Key == Key.Enter
-      && sender is TextBox textBox
-      && textBox.DataContext is Goal goal)
+    if (sender is not TextBox textBox
+      || textBox.DataContext is not Goal goal)
+    {
+      return;
+    }
+
+    if (e.Key == Key.Enter)
     {
       goal.EndEdit();
+      textBox.GetLogicalAncestors().OfType<TreeViewItem>().FirstOrDefault()?.Focus();
+      e.Handled = true;
+    }
+    else if (e.Key == Key.Escape)
+    {
+      goal.CancelEdit();
       textBox.GetLogicalAncestors().OfType<TreeViewItem>().FirstOrDefault()?.Focus();
       e.Handled = true;
     }
