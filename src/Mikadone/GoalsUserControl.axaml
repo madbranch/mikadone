@@ -6,7 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:DataType="mikadone:GoalsViewModel"
              mc:Ignorable="d">
-  <TreeView ItemsSource="{Binding Root.Prerequisites}" FontSize="14">
+  <TreeView ItemsSource="{Binding Root.Prerequisites}" SelectedItem="{Binding SelectedGoal}" KeyDown="TreeView_KeyDown">
     <TreeView.ItemTemplate>
       <TreeDataTemplate DataType="{x:Type mikadone:Goal}" ItemsSource="{Binding Prerequisites}">
         <StackPanel Orientation="Horizontal">

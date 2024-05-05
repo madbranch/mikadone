@@ -1,20 +1,22 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using DynamicData;
 using ReactiveUI;
 
 namespace Mikadone;
 
-public class Goal : ReactiveObject
+public class Goal : ReactiveObject, IEditableObject
 {
   private bool _isReached;
   private string _description = string.Empty;
   private readonly SourceList<Goal> _prerequisitesSource = new();
   private readonly ReadOnlyObservableCollection<Goal> _prerequisites;
   private Goal? _parent;
+  private string? _originalDescription;
+  private bool _isEditing;
 
   public Goal()
   {
@@ -45,6 +47,12 @@ public class Goal : ReactiveObject
     private set => this.RaiseAndSetIfChanged(ref _parent, value);
   }
 
+  public bool IsEditing
+  {
+    get => _isEditing;
+    private set => this.RaiseAndSetIfChanged(ref _isEditing, value);
+  }
+
   public void AddPrerequisite(Goal prerequisite)
   {
     if (prerequisite.Parent is not null)
@@ -73,5 +81,33 @@ public class Goal : ReactiveObject
 
   private static char XIfTrue(bool value)
     => value ? 'x' : ' ';
+  
+  public void BeginEdit()
+  {
+    if (_originalDescription is not null)
+    {
+      // It's already being edited, so we ignore the call.
+      return;
+    }
 
+    _originalDescription = Description;
+    IsEditing = true;
+  }
+  public void CancelEdit()
+  {
+    if (_originalDescription is null)
+    {
+      // It's not being edited, so we ignore the call.
+      return;
+    }
+
+    IsEditing = false;
+    Description = _originalDescription;
+  }
+
+  public void EndEdit()
+  {
+    _originalDescription = null;
+    IsEditing = false;
+  }
 }
