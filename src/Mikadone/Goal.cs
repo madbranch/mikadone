@@ -18,6 +18,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private Goal? _parent;
   private string? _originalDescription;
   private bool _isEditing;
+  private bool _isExpanded = true;
 
   public Goal()
     : this(false, string.Empty, [])
@@ -61,6 +62,12 @@ public sealed class Goal : ReactiveObject, IEditableObject
   {
     get => _isEditing;
     private set => this.RaiseAndSetIfChanged(ref _isEditing, value);
+  }
+
+  public bool IsExpanded
+  {
+    get => _isExpanded;
+    set => this.RaiseAndSetIfChanged(ref _isExpanded, value);
   }
 
   public void AddPrerequisite(Goal prerequisite)

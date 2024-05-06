@@ -7,6 +7,11 @@
              x:DataType="mikadone:GoalsViewModel"
              mc:Ignorable="d">
   <TreeView ItemsSource="{Binding Root.Prerequisites}" KeyDown="TreeView_KeyDown" SelectedItem="{Binding SelectedGoal}">
+    <TreeView.Styles>
+      <Style x:DataType="mikadone:Goal" Selector="TreeViewItem">
+        <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+      </Style>
+    </TreeView.Styles>
     <TreeView.ItemTemplate>
       <TreeDataTemplate DataType="{x:Type mikadone:Goal}" ItemsSource="{Binding Prerequisites}">
         <StackPanel Orientation="Horizontal">
