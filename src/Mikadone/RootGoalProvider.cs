@@ -16,7 +16,6 @@ public class RootGoalProvider : IRootGoalProvider
     _goalSerialization = goalSerialization;
   }
 
-
   public Goal GetRootGoal()
   {
       IsolatedGoalStorage isolatedGoalStorage = new();
@@ -25,7 +24,7 @@ public class RootGoalProvider : IRootGoalProvider
 
       if (stream is null)
       {
-        return _goalFactory.CreateGoal(false, string.Empty, []);
+        return GetDefaultRootGoal();
       }
   
       using StreamReader reader = new StreamReader(stream: stream,
@@ -33,6 +32,10 @@ public class RootGoalProvider : IRootGoalProvider
                                                    detectEncodingFromByteOrderMarks: false);
 
       return _goalSerialization.Deserialize(reader.ReadToEnd())
-        ?? _goalFactory.CreateGoal(false, string.Empty, []);
+        ?? GetDefaultRootGoal();
   }
+
+  private Goal GetDefaultRootGoal()
+    => _goalFactory.CreateGoal(false, "", [_goalFactory.CreateGoal(false, "Please enjoy Mikadone!", [])]);
+
 }
