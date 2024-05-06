@@ -1,3 +1,5 @@
+using System.IO;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -12,7 +14,9 @@ public partial class App : Application
   {
     if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
     {
-      GoalsViewModel goals = new GoalsViewModel();
+      Goal root = GetRoot();
+
+      GoalsViewModel goals = new GoalsViewModel(root);
 
       goals.Root.AddPrerequisite( new Goal() { Description = "Oh yeah"} );
       goals.Root.Prerequisites[0].AddPrerequisite( new Goal() { Description = "Meh"} );
@@ -27,4 +31,27 @@ public partial class App : Application
 
     base.OnFrameworkInitializationCompleted();
   }
+
+  private static Goal GetRoot()
+  {
+      IsolatedGoalStorage isolatedGoalStorage = new();
+
+      using Stream? stream = isolatedGoalStorage.OpenRead("todo.md");
+
+      if (stream is null)
+      {
+        return new Goal();
+      }
+  
+      using StreamReader reader = new StreamReader(stream: stream,
+                                                   encoding: UTF8WithoutBOM,
+                                                   detectEncodingFromByteOrderMarks: false);
+
+      GoalSerialization goalSerialization = new();
+
+      return goalSerialization.Deserialize(reader.ReadToEnd())
+        ?? new Goal();
+  }
+
+  private static readonly Encoding UTF8WithoutBOM = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 }

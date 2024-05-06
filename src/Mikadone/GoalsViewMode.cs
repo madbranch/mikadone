@@ -5,8 +5,21 @@ namespace Mikadone;
 public class GoalsViewModel : ReactiveObject
 {
   private Goal? _selectedGoal;
+  private Goal _root;
 
-  public Goal Root { get; } = new Goal();
+  public GoalsViewModel()
+    : this(new Goal())
+  {
+  }
+
+  public GoalsViewModel(Goal root)
+    => _root = root;
+
+  public Goal Root
+  {
+    get => _root;
+    set => this.RaiseAndSetIfChanged(ref _root, value);
+  }
 
   public Goal? SelectedGoal
   {

@@ -7,12 +7,6 @@ using System.Text.Json.Nodes;
 
 namespace Mikadone;
 
-public interface IGoalSerialization
-{
-  Stream Serialize(Goal goal, Stream stream);
-  Goal? Deserialize(string jsonString);
-}
-
 public class GoalSerialization : IGoalSerialization
 {
   public Stream Serialize(Goal goal, Stream stream)
