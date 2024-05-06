@@ -20,13 +20,15 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private bool _isEditing;
   private bool _isExpanded = true;
 
-  public Goal()
-    : this(false, string.Empty, [])
+  public Goal(int id)
+    : this(id, false, string.Empty, [])
   {
   }
 
-  public Goal(bool isReached, string description, IEnumerable<Goal> prerequisites)
+  public Goal(int id, bool isReached, string description, IEnumerable<Goal> prerequisites)
   {
+    Id = id;
+
     _isReached = isReached;
     _description = description;
     _prerequisitesSource.AddRange(prerequisites);
@@ -37,6 +39,8 @@ public sealed class Goal : ReactiveObject, IEditableObject
       .Bind(out _prerequisites)
       .Subscribe();
   }
+
+  public int Id { get; }
 
   public bool IsReached
   {

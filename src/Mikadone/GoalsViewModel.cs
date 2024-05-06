@@ -7,13 +7,8 @@ public class GoalsViewModel : ReactiveObject
   private Goal? _selectedGoal;
   private Goal _root;
 
-  public GoalsViewModel()
-    : this(new Goal())
-  {
-  }
-
-  public GoalsViewModel(Goal root)
-    => _root = root;
+  public GoalsViewModel(IRootGoalProvider rootGoalProvider)
+    => _root = rootGoalProvider.GetRootGoal();
 
   public Goal Root
   {

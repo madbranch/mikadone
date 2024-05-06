@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +8,9 @@ namespace Mikadone;
 
 public class GoalSerialization : IGoalSerialization
 {
+  public GoalSerialization(IGoalFactory goalFactory)
+    => _goalFactory = goalFactory;
+
   public Stream Serialize(Goal goal, Stream stream)
   {
     using Utf8JsonWriter writer = new(stream, WriterOptions);
@@ -21,8 +23,8 @@ public class GoalSerialization : IGoalSerialization
       ? null
       : Deserialize(rootNode);
 
-  private static Goal Deserialize(JsonObject node)
-    => new Goal(GetIsReached(node), GetDescription(node), GetPrerequisites(node));
+  private Goal Deserialize(JsonObject node)
+    => _goalFactory.CreateGoal(GetIsReached(node), GetDescription(node), GetPrerequisites(node));
 
   private static bool GetIsReached(JsonObject node)
     => node["isReached"] is JsonValue isReachedValue && isReachedValue.GetValueKind() == JsonValueKind.True;
@@ -32,7 +34,7 @@ public class GoalSerialization : IGoalSerialization
     ? description
     : string.Empty;
   
-  private static IEnumerable<Goal> GetPrerequisites(JsonObject node)
+  private IEnumerable<Goal> GetPrerequisites(JsonObject node)
     => node["prerequisites"] is JsonArray prerequisitesArray
     ? prerequisitesArray.OfType<JsonObject>().Select(Deserialize)
     : [];
@@ -53,4 +55,6 @@ public class GoalSerialization : IGoalSerialization
 
   private static readonly JsonWriterOptions WriterOptions = new() { Indented = true };
   private static readonly JsonReaderOptions ReaderOptions = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
+  private readonly IGoalFactory _goalFactory;
+
 }

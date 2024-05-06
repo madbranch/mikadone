@@ -11,13 +11,13 @@ public class GoalTests
   [Fact]
   public void Serialization()
   {
-    Goal root = new();
-    root.AddPrerequisite(new Goal() { Description = "Oh yeah" });
-    root.Prerequisites[0].AddPrerequisite(new Goal() { Description = "Meh" });
-    root.Prerequisites[0].AddPrerequisite(new Goal() { Description = "Huh" });
-    root.AddPrerequisite(new Goal() { IsReached = true, Description = "Oh no" });
+    Goal root = new(0);
+    root.AddPrerequisite(new Goal(1) { Description = "Oh yeah" });
+    root.Prerequisites[0].AddPrerequisite(new Goal(2) { Description = "Meh" });
+    root.Prerequisites[0].AddPrerequisite(new Goal(3) { Description = "Huh" });
+    root.AddPrerequisite(new Goal(4) { IsReached = true, Description = "Oh no" });
 
-    GoalSerialization goalSerialization = new();
+    GoalSerialization goalSerialization = new(new GoalFactory(new GoalIdProvider()));
 
     using MemoryStream stream = new();
     
