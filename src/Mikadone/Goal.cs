@@ -10,6 +10,16 @@ using ReactiveUI;
 
 namespace Mikadone;
 
+public interface IGoalEdit
+{
+  void Do(Goal root);
+}
+
+public record GoalEditIsReached(GoalPath path, bool isReached) : IGoalEdit
+{
+  public void Do(Goal root) => throw new NotImplementedException();
+}
+
 public sealed class Goal : ReactiveObject, IEditableObject
 {
   private bool _isReached;
@@ -79,7 +89,22 @@ public sealed class Goal : ReactiveObject, IEditableObject
     => Parent?.GetRoot() ?? this;
 
   public GoalPath GetPath()
-    => (Parent?.GetPath() ?? GoalPath.Empty) + Id;
+    => Parent is Goal parent
+    ? parent.GetPath() + Id
+    : GoalPath.Empty;
+  
+  public Goal GetGoal(GoalPath path)
+  {
+    if (path.Path.Length == 0)
+    {
+      return this;
+    }
+
+    GoalId id = path.Path[0];
+
+    return Prerequisites.First(prerequisite => prerequisite.Id == id)
+      .GetGoal(new GoalPath(path.Path.RemoveAt(0)));
+  }
 
   public void AddPrerequisite(Goal prerequisite)
   {
