@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -20,12 +21,12 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private bool _isEditing;
   private bool _isExpanded = true;
 
-  public Goal(int id)
+  public Goal(GoalId id)
     : this(id, false, string.Empty, [])
   {
   }
 
-  public Goal(int id, bool isReached, string description, IEnumerable<Goal> prerequisites)
+  public Goal(GoalId id, bool isReached, string description, IEnumerable<Goal> prerequisites)
   {
     Id = id;
 
@@ -40,7 +41,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
       .Subscribe();
   }
 
-  public int Id { get; }
+  public GoalId Id { get; }
 
   public bool IsReached
   {
@@ -73,6 +74,12 @@ public sealed class Goal : ReactiveObject, IEditableObject
     get => _isExpanded;
     set => this.RaiseAndSetIfChanged(ref _isExpanded, value);
   }
+
+  public Goal GetRoot()
+    => Parent?.GetRoot() ?? this;
+
+  public GoalPath GetPath()
+    => (Parent?.GetPath() ?? GoalPath.Empty) + Id;
 
   public void AddPrerequisite(Goal prerequisite)
   {
