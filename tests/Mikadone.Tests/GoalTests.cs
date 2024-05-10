@@ -9,11 +9,11 @@ public class GoalTests
   [Fact]
   public void Serialization()
   {
-    Goal root = new(0);
-    root.AddPrerequisite(new Goal(1) { Description = "Oh yeah" });
-    root.Prerequisites[0].AddPrerequisite(new Goal(2) { Description = "Meh" });
-    root.Prerequisites[0].AddPrerequisite(new Goal(3) { Description = "Huh" });
-    root.AddPrerequisite(new Goal(4) { IsReached = true, Description = "Oh no" });
+    Goal root = new(new GoalId(0), false, string.Empty, []);
+    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", []));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", []));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", []) );
+    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", []));
 
     GoalSerialization goalSerialization = new(new GoalFactory(new GoalIdProvider()));
 

@@ -21,11 +21,6 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private bool _isEditing;
   private bool _isExpanded = true;
 
-  public Goal(GoalId id)
-    : this(id, false, string.Empty, [])
-  {
-  }
-
   public Goal(GoalId id, bool isReached, string description, IEnumerable<Goal> prerequisites)
   {
     Id = id;
