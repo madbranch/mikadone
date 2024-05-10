@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mikadone.GoalEdit;
 
@@ -8,7 +9,12 @@ public class GoalEditing : IGoalEditing
   public void AddEdit(IGoalEdit undo, IGoalEdit redo)
   {
     _redos.Clear();
-    _undos.Push((undo, redo));
+    _undos.Add((undo, redo));
+
+    if (_undos.Count > 100)
+    {
+      _undos.RemoveAt(0);
+    }
   }
   
   public bool TryRedo(Goal root)
@@ -18,10 +24,14 @@ public class GoalEditing : IGoalEditing
       throw new InvalidOperationException("Don't redo while already undoing or redoing.");
     }
 
-    if (!_redos.TryPop(out (IGoalEdit Undo, IGoalEdit Redo) item))
+    if (_redos.Count == 0)
     {
       return false;
     }
+
+    int index = _redos.Count - 1;
+    (IGoalEdit Undo, IGoalEdit Redo) item = _redos[index];
+    _redos.RemoveAt(index);
 
     try
     {
@@ -33,7 +43,7 @@ public class GoalEditing : IGoalEditing
       _isEditing = false;
     }
 
-    _undos.Push(item);
+    _undos.Add(item);
     return true;
   }
 
@@ -44,10 +54,14 @@ public class GoalEditing : IGoalEditing
       throw new InvalidOperationException("Don't undo while already undoing or redoing.");
     }
 
-    if (!_undos.TryPop(out (IGoalEdit Undo, IGoalEdit Redo) item))
+    if (_undos.Count == 0)
     {
       return false;
     }
+
+    int index = _redos.Count - 1;
+    (IGoalEdit Undo, IGoalEdit Redo) item = _undos[index];
+    _undos.RemoveAt(index);
 
     try
     {
@@ -59,12 +73,11 @@ public class GoalEditing : IGoalEditing
       _isEditing = false;
     }
 
-    _redos.Push(item);
+    _redos.Add(item);
     return true;
   }
 
-
-  private readonly Stack<(IGoalEdit Undo, IGoalEdit Redo)> _undos = [];
-  private readonly Stack<(IGoalEdit Undo, IGoalEdit Redo)> _redos = [];
+  private readonly List<(IGoalEdit Undo, IGoalEdit Redo)> _undos = [];
+  private readonly List<(IGoalEdit Undo, IGoalEdit Redo)> _redos = [];
   bool _isEditing;
 }
