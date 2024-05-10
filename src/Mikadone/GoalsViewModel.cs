@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using DynamicData.Binding;
 using ReactiveUI;
 
 namespace Mikadone;
@@ -8,7 +11,9 @@ public class GoalsViewModel : ReactiveObject
   private Goal _root;
 
   public GoalsViewModel(IRootGoalProvider rootGoalProvider)
-    => _root = rootGoalProvider.GetRootGoal();
+  {
+    _root = rootGoalProvider.GetRootGoal();
+  }
 
   public Goal Root
   {

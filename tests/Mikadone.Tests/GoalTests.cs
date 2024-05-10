@@ -1,6 +1,8 @@
 using System.IO;
 using System.Text;
 using FluentAssertions;
+using Mikadone.GoalEdit;
+using NSubstitute;
 
 namespace Mikadone;
 
@@ -9,13 +11,14 @@ public class GoalTests
   [Fact]
   public void Serialization()
   {
-    Goal root = new(new GoalId(0), false, string.Empty, []);
-    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", []));
-    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", []));
-    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", []) );
-    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", []));
+    IGoalEditing goalEditing = Substitute.For<IGoalEditing>();
+    Goal root = new(new GoalId(0), false, string.Empty, [], goalEditing);
+    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", [], goalEditing));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", [], goalEditing));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", [], goalEditing) );
+    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", [], goalEditing));
 
-    GoalSerialization goalSerialization = new(new GoalFactory(new GoalIdProvider()));
+    GoalSerialization goalSerialization = new(new GoalFactory(new GoalIdProvider(), goalEditing));
 
     using MemoryStream stream = new();
     

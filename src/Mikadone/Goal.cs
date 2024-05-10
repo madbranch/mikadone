@@ -5,8 +5,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
-using DynamicData;
 using ReactiveUI;
+using DynamicData;
+using Mikadone.GoalEdit;
 
 namespace Mikadone;
 
@@ -16,24 +17,50 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private string _description;
   private readonly SourceList<Goal> _prerequisitesSource = new();
   private readonly ReadOnlyObservableCollection<Goal> _prerequisites;
+  private readonly IGoalEditing _goalEditing;
   private Goal? _parent;
   private string? _originalDescription;
   private bool _isEditing;
   private bool _isExpanded = true;
 
-  public Goal(GoalId id, bool isReached, string description, IEnumerable<Goal> prerequisites)
+  public Goal(GoalId id, bool isReached, string description, IEnumerable<Goal> prerequisites, IGoalEditing goalEditing)
   {
     Id = id;
-
     _isReached = isReached;
     _description = description;
+    _goalEditing = goalEditing;
     _prerequisitesSource.AddRange(prerequisites);
+    _goalEditing = goalEditing;
 
     _ = _prerequisitesSource
       .Connect()
       .ObserveOn(RxApp.MainThreadScheduler)
       .Bind(out _prerequisites)
       .Subscribe();
+
+    _ = this.WhenAny(x => x.IsReached, isReached => isReached)
+      .Subscribe(AddIsReachedEdit);
+    _ = this.WhenAny(x => x.Description, description => description)
+      .Buffer(2, 1)
+      .Subscribe(AddDescriptionEdit);
+
+    static void AddIsReachedEdit(IObservedChange<Goal, bool> change)
+    {
+      GoalPath path = change.Sender.GetPath();
+      change.Sender._goalEditing.AddEdit(
+        new GoalEditIsReached(path, !change.Value),
+        new GoalEditIsReached(path, change.Value));
+    }
+
+    static void AddDescriptionEdit(IList<IObservedChange<Goal, string>> changes)
+    {
+      Goal sender = changes[0].Sender;
+      GoalPath path = sender.GetPath();
+      sender._goalEditing.AddEdit(
+        new GoalEditDescription(path, changes[0].Value),
+        new GoalEditDescription(path, changes[1].Value)
+      );
+    }
   }
 
   public GoalId Id { get; }
