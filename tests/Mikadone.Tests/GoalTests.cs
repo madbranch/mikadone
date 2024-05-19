@@ -12,13 +12,14 @@ public class GoalTests
   public void Serialization()
   {
     IGoalEditing goalEditing = Substitute.For<IGoalEditing>();
-    Goal root = new(new GoalId(0), false, string.Empty, [], goalEditing);
-    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", [], goalEditing));
-    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", [], goalEditing));
-    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", [], goalEditing) );
-    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", [], goalEditing));
+    GoalFactory goalFactory = new(new GoalIdProvider(), goalEditing);
+    Goal root = new(new GoalId(0), false, string.Empty, [], goalEditing, goalFactory);
+    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", [], goalEditing, goalFactory));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", [], goalEditing, goalFactory));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", [], goalEditing, goalFactory) );
+    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", [], goalEditing, goalFactory));
 
-    GoalSerialization goalSerialization = new(new GoalFactory(new GoalIdProvider(), goalEditing));
+    GoalSerialization goalSerialization = new(goalFactory);
 
     using MemoryStream stream = new();
     

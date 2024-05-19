@@ -8,6 +8,8 @@ using System.Reactive.Linq;
 using ReactiveUI;
 using DynamicData;
 using Mikadone.GoalEdit;
+using System.Reactive;
+using System.Windows.Input;
 
 namespace Mikadone;
 
@@ -18,12 +20,18 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private readonly SourceList<Goal> _prerequisitesSource = new();
   private readonly ReadOnlyObservableCollection<Goal> _prerequisites;
   private readonly IGoalEditing _goalEditing;
+  private readonly IGoalFactory _goalFactory;
   private Goal? _parent;
   private string? _originalDescription;
   private bool _isEditing;
   private bool _isExpanded = true;
 
-  public Goal(GoalId id, bool isReached, string description, IEnumerable<Goal> prerequisites, IGoalEditing goalEditing)
+  public Goal(GoalId id,
+              bool isReached,
+              string description,
+              IEnumerable<Goal> prerequisites,
+              IGoalEditing goalEditing,
+              IGoalFactory goalFactory)
   {
     Id = id;
     _isReached = isReached;
@@ -31,6 +39,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
     _goalEditing = goalEditing;
     _prerequisitesSource.AddRange(prerequisites);
     _goalEditing = goalEditing;
+    _goalFactory = goalFactory;
 
     _ = _prerequisitesSource
       .Connect()
@@ -190,6 +199,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
     _originalDescription = Description;
     IsEditing = true;
   }
+
   public void CancelEdit()
   {
     if (_originalDescription is null)

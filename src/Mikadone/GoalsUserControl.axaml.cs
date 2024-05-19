@@ -3,13 +3,75 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 
 namespace Mikadone;
 
 public partial class GoalsUserControl : UserControl
 {
-  public GoalsUserControl() => InitializeComponent();
+  public GoalsUserControl()
+  {
+    InitializeComponent();
+    GoalsList.AddHandler(KeyDownEvent, GoalsList_KeyDown, RoutingStrategies.Tunnel);
+  }
+  private void GoalsList_KeyDown(object? sender, KeyEventArgs e)
+  {
+    if (DataContext is not GoalsViewModel viewModel || viewModel.SelectedGoal is not Goal selectedGoal)
+    {
+      return;
+    }
+
+    switch (e.Key)
+    {
+      case Key.Space:
+      {
+        selectedGoal.IsReached = !selectedGoal.IsReached;
+        e.Handled = true;
+        break;
+      }
+      case Key.F2:
+      {
+        selectedGoal.BeginEdit();
+        e.Handled = true;
+        break;
+      }
+      case Key.Enter:
+      {
+        if (selectedGoal.IsEditing == true)
+        {
+          // We do nothing, we let the TextBox.KeyDown handle it.
+          return;
+        }
+
+        if (e.KeyModifiers == KeyModifiers.Shift)
+        {
+          viewModel.AddNewPrerequisite.Execute("New task");
+          e.Handled = true;
+        }
+        else
+        {
+          // todo: add sibling
+          e.Handled = true;
+        }
+        break;
+      }
+      case Key.Tab:
+      {
+        if (e.KeyModifiers == KeyModifiers.Shift)
+        {
+          // todo: move up one level
+          e.Handled = true;
+        }
+        else
+        {
+          // todo: move down one level
+          e.Handled = true;
+        }
+        break;
+      }
+    }
+  }
 
   private void TextBox_KeyDown(object? sender, KeyEventArgs e)
   {
@@ -18,6 +80,10 @@ public partial class GoalsUserControl : UserControl
     {
       return;
     }
+
+    // We want to handle the EndEdit() and CancelEdit() here to be
+    // able to focus the TreeViewItem correctly to make arrows still
+    // usable.
 
     if (e.Key == Key.Enter)
     {
@@ -33,10 +99,10 @@ public partial class GoalsUserControl : UserControl
     }
   }
 
-  private void TextBox_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+  private void TextBox_AttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
   {
-    if (e.Property != IsVisibleProperty
-      || sender is not TextBox textBox)
+    if (sender is not TextBox textBox
+      || !textBox.IsVisible)
     {
       return;
     }
@@ -45,63 +111,16 @@ public partial class GoalsUserControl : UserControl
     textBox.SelectAll();
   }
 
-  private void TreeView_KeyDown(object? sender, KeyEventArgs e)
+  private void TextBox_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
   {
-    if (DataContext is not GoalsViewModel viewModel)
+    if (e.Property != IsVisibleProperty
+      || sender is not TextBox textBox
+      || !textBox.IsVisible)
     {
       return;
     }
 
-    if (viewModel.SelectedGoal is not Goal selectedGoal)
-    {
-      return;
-    }
-
-    if (e.Key == Key.Space)
-    {
-      selectedGoal.IsReached = !selectedGoal.IsReached;
-      e.Handled = true;
-    }
-    if (e.Key == Key.F2)
-    {
-      selectedGoal.BeginEdit();
-      e.Handled = true;
-    }
-    else if (e.Key == Key.Enter)
-    {
-      if (selectedGoal.IsEditing == true)
-      {
-        selectedGoal.EndEdit();
-        e.Handled = true;
-      }
-      else if (e.KeyModifiers == KeyModifiers.Shift)
-      {
-        // todo: add prerequisite
-        e.Handled = true;
-      }
-      else
-      {
-        // todo: add sibling
-        e.Handled = true;
-      }
-    }
-    else if (e.Key == Key.Escape)
-    {
-      selectedGoal.CancelEdit();
-      e.Handled = true;
-    }
-    else if (e.Key == Key.Tab)
-    {
-      if (e.KeyModifiers == KeyModifiers.Shift)
-      {
-        // todo: move up one level
-        e.Handled = true;
-      }
-      else
-      {
-        // todo: move down one level
-        e.Handled = true;
-      }
-    }
+    textBox.Focus();
+    textBox.SelectAll();
   }
 }
