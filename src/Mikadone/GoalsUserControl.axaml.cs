@@ -13,6 +13,9 @@ public partial class GoalsUserControl : UserControl
   public GoalsUserControl()
   {
     InitializeComponent();
+
+    // We connect to the KeyDownEvent in code here to handle it when it's tunneling.
+    // Connecting to it in the XAML would handle it when it's bubbling.
     GoalsList.AddHandler(KeyDownEvent, GoalsList_KeyDown, RoutingStrategies.Tunnel);
   }
   private void GoalsList_KeyDown(object? sender, KeyEventArgs e)
@@ -107,6 +110,9 @@ public partial class GoalsUserControl : UserControl
       return;
     }
 
+    // When editing a new item, we don't get a PropertyChanged on the IsVisible property
+    // so we react on the item getting attached to the visual tree.
+
     textBox.Focus();
     textBox.SelectAll();
   }
@@ -119,6 +125,9 @@ public partial class GoalsUserControl : UserControl
     {
       return;
     }
+
+    // When editing an existing item, we can simply react on the IsVisible
+    // property of the TextBox being set to true.
 
     textBox.Focus();
     textBox.SelectAll();
