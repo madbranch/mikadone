@@ -17,6 +17,7 @@ public partial class GoalsUserControl : UserControl
     // Connecting to it in the XAML would handle it when it's bubbling.
     GoalsList.AddHandler(KeyDownEvent, GoalsList_KeyDown, RoutingStrategies.Tunnel);
   }
+
   private void GoalsList_KeyDown(object? sender, KeyEventArgs e)
   {
     if (DataContext is not GoalsViewModel viewModel || viewModel.SelectedGoal is not Goal selectedGoal)
@@ -53,7 +54,7 @@ public partial class GoalsUserControl : UserControl
         }
         else
         {
-          // todo: add sibling
+          viewModel.AddNewSiblingPrerequisite.Execute("New task");
           e.Handled = true;
         }
         break;

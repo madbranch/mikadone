@@ -37,6 +37,10 @@ public sealed class Goal : ReactiveObject, IEditableObject
     _isReached = isReached;
     _description = description;
     _goalEditing = goalEditing;
+    foreach (Goal prerequisite in prerequisites)
+    {
+      prerequisite.Parent = this;
+    }
     _prerequisitesSource.AddRange(prerequisites);
     _goalEditing = goalEditing;
     _goalFactory = goalFactory;
