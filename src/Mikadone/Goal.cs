@@ -8,8 +8,6 @@ using System.Reactive.Linq;
 using ReactiveUI;
 using DynamicData;
 using Mikadone.GoalEdit;
-using System.Reactive;
-using System.Windows.Input;
 
 namespace Mikadone;
 
