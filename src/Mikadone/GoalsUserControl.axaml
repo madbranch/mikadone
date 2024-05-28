@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mikadone="using:Mikadone"
              x:DataType="mikadone:GoalsViewModel"
+             KeyDown="UserControl_KeyDown"
              mc:Ignorable="d">
   <TreeView x:Name="GoalsList" ItemsSource="{Binding Root.Prerequisites}" SelectedItem="{Binding SelectedGoal}">
     <TreeView.Styles>

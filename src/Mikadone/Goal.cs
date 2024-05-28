@@ -18,7 +18,6 @@ public sealed class Goal : ReactiveObject, IEditableObject
   private readonly SourceList<Goal> _prerequisitesSource = new();
   private readonly ReadOnlyObservableCollection<Goal> _prerequisites;
   private readonly IGoalEditing _goalEditing;
-  private readonly IGoalFactory _goalFactory;
   private Goal? _parent;
   private string? _originalDescription;
   private bool _isEditing;
@@ -28,8 +27,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
               bool isReached,
               string description,
               IEnumerable<Goal> prerequisites,
-              IGoalEditing goalEditing,
-              IGoalFactory goalFactory)
+              IGoalEditing goalEditing)
   {
     Id = id;
     _isReached = isReached;
@@ -41,7 +39,6 @@ public sealed class Goal : ReactiveObject, IEditableObject
     }
     _prerequisitesSource.AddRange(prerequisites);
     _goalEditing = goalEditing;
-    _goalFactory = goalFactory;
 
     _ = _prerequisitesSource
       .Connect()
@@ -50,10 +47,8 @@ public sealed class Goal : ReactiveObject, IEditableObject
       .Subscribe();
 
     _ = this.WhenAny(x => x.IsReached, isReached => isReached)
+      .Skip(1)
       .Subscribe(AddIsReachedEdit);
-    _ = this.WhenAny(x => x.Description, description => description)
-      .Buffer(2, 1)
-      .Subscribe(AddDescriptionEdit);
 
     static void AddIsReachedEdit(IObservedChange<Goal, bool> change)
     {
@@ -61,16 +56,6 @@ public sealed class Goal : ReactiveObject, IEditableObject
       change.Sender._goalEditing.AddEdit(
         new GoalEditIsReached(path, !change.Value),
         new GoalEditIsReached(path, change.Value));
-    }
-
-    static void AddDescriptionEdit(IList<IObservedChange<Goal, string>> changes)
-    {
-      Goal sender = changes[0].Sender;
-      GoalPath path = sender.GetPath();
-      sender._goalEditing.AddEdit(
-        new GoalEditDescription(path, changes[0].Value),
-        new GoalEditDescription(path, changes[1].Value)
-      );
     }
   }
 
@@ -217,6 +202,16 @@ public sealed class Goal : ReactiveObject, IEditableObject
 
   public void EndEdit()
   {
+    if (_originalDescription is string originalDescription
+      && originalDescription != Description)
+    {
+      GoalPath path = GetPath();
+      _goalEditing.AddEdit(
+        new GoalEditDescription(path, originalDescription),
+        new GoalEditDescription(path, Description)
+      );
+    }
+
     _originalDescription = null;
     IsEditing = false;
   }

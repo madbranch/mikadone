@@ -8,6 +8,7 @@ public class GoalEditing : IGoalEditing
 {
   public void AddEdit(IGoalEdit undo, IGoalEdit redo)
   {
+    System.Diagnostics.Trace.WriteLine($"Adding edit: {undo}, {redo}");
     _redos.Clear();
     _undos.Add((undo, redo));
 
@@ -59,7 +60,7 @@ public class GoalEditing : IGoalEditing
       return false;
     }
 
-    int index = _redos.Count - 1;
+    int index = _undos.Count - 1;
     (IGoalEdit Undo, IGoalEdit Redo) item = _undos[index];
     _undos.RemoveAt(index);
 

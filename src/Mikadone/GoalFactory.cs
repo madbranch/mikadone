@@ -17,6 +17,6 @@ public class GoalFactory : IGoalFactory
 
 
   public Goal CreateGoal(bool isReached, string description, IEnumerable<Goal> prerequisites)
-    => new Goal(_goalIdProvider.GetNextId(), isReached, description, prerequisites, _goalEditing, this);
+    => new Goal(_goalIdProvider.GetNextId(), isReached, description, prerequisites, _goalEditing);
 
 }

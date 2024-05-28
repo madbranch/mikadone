@@ -1,4 +1,6 @@
 using System.Linq;
+using System.Reactive;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -16,6 +18,30 @@ public partial class GoalsUserControl : UserControl
     // We connect to the KeyDownEvent in code here to handle it when it's tunneling.
     // Connecting to it in the XAML would handle it when it's bubbling.
     GoalsList.AddHandler(KeyDownEvent, GoalsList_KeyDown, RoutingStrategies.Tunnel);
+  }
+
+  private void UserControl_KeyDown(object? sender, KeyEventArgs e)
+  {
+    if (DataContext is not GoalsViewModel viewModel)
+    {
+      return;
+    }
+
+    if (e.Key == Key.Z)
+    {
+      bool isMacOs = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+      KeyModifiers osKeyModifier = isMacOs ? KeyModifiers.Meta : KeyModifiers.Control;
+
+      if (e.KeyModifiers == osKeyModifier)
+      {
+        viewModel.Undo.Execute(Unit.Default);
+      }
+      else if (e.KeyModifiers == (osKeyModifier | KeyModifiers.Shift))
+      {
+        viewModel.Redo.Execute(Unit.Default);
+      }
+    }
   }
 
   private void GoalsList_KeyDown(object? sender, KeyEventArgs e)

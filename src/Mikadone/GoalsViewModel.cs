@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using System.Windows.Input;
 using Mikadone.GoalEdit;
 using ReactiveUI;
@@ -11,6 +12,8 @@ public class GoalsViewModel : ReactiveObject
   private Goal _root;
   private readonly ReactiveCommand<string, Goal?> _addNewPrerequisiteCommand;
   private readonly ReactiveCommand<string, Goal?> _addNewSiblingPrerequisiteCommand;
+  private readonly ReactiveCommand<Unit, bool> _undoCommand;
+  private readonly ReactiveCommand<Unit, bool> _redoCommand;
   private readonly IRootGoalProvider _rootGoalProvider;
   private readonly IGoalFactory _goalFactory;
   private readonly IGoalEditing _goalEditing;
@@ -24,6 +27,8 @@ public class GoalsViewModel : ReactiveObject
     IObservable<bool> canExecuteAddNewPrerequisite = this.WhenAnyValue<GoalsViewModel, bool, Goal?>(x => x.SelectedGoal, x => x is not null);
     _addNewPrerequisiteCommand = ReactiveCommand.Create<string, Goal?>(ExecuteAddNewPrerequisiteCommand, canExecuteAddNewPrerequisite);
     _addNewSiblingPrerequisiteCommand = ReactiveCommand.Create<string, Goal?>(ExecuteAddNewSiblingPrerequisiteCommand, canExecuteAddNewPrerequisite);
+    _undoCommand = ReactiveCommand.Create<Unit, bool>(_ => _goalEditing.TryUndo(Root));
+    _redoCommand = ReactiveCommand.Create<Unit, bool>(_ => _goalEditing.TryRedo(Root));
   }
 
   public Goal Root
@@ -57,6 +62,10 @@ public class GoalsViewModel : ReactiveObject
   }
 
   public ICommand AddNewSiblingPrerequisite => _addNewSiblingPrerequisiteCommand;
+
+  public ICommand Undo => _undoCommand;
+
+  public ICommand Redo => _redoCommand;
 
   private Goal? ExecuteAddNewSiblingPrerequisiteCommand(string description)
   {
