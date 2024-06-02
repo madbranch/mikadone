@@ -7,6 +7,7 @@ public static class ServiceCollectionExtensions
 {
   public static IServiceCollection AddMikadoneServices(this IServiceCollection collection)
     => collection
+    .AddSingleton<IGoalStorage, IsolatedGoalStorage>()
     .AddSingleton<IGoalIdProvider, GoalIdProvider>()
     .AddSingleton<IGoalEditing, GoalEditing>()
     .AddSingleton<IGoalFactory, GoalFactory>()
