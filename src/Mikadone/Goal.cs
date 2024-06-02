@@ -1,27 +1,40 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Linq;
-using ReactiveUI;
-using DynamicData;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Mikadone.GoalEdit;
 
 namespace Mikadone;
 
-public sealed class Goal : ReactiveObject, IEditableObject
+public sealed partial class Goal : ObservableObject, IEditableObject
 {
-  private bool _isReached;
-  private string _description;
-  private readonly SourceList<Goal> _prerequisitesSource = new();
-  private readonly ReadOnlyObservableCollection<Goal> _prerequisites;
-  private readonly IGoalEditing _goalEditing;
+  [ObservableProperty]
   private Goal? _parent;
-  private string? _originalDescription;
+
+  [ObservableProperty]
   private bool _isEditing;
+
+  [ObservableProperty]
+  private bool _isReached;
+
+  partial void OnIsReachedChanged(bool oldValue, bool newValue)
+  {
+    GoalPath path = GetPath();
+    _goalEditing.AddEdit(
+      new GoalEditIsReached(path, oldValue),
+      new GoalEditIsReached(path, newValue));
+  }
+
+  [ObservableProperty]
+  private string _description;
+
+  [ObservableProperty]
   private bool _isExpanded = true;
+
+  private readonly IGoalEditing _goalEditing;
+  private string? _originalDescription;
 
   public Goal(GoalId id,
               bool isReached,
@@ -37,61 +50,15 @@ public sealed class Goal : ReactiveObject, IEditableObject
     {
       prerequisite.Parent = this;
     }
-    _prerequisitesSource.AddRange(prerequisites);
+
+    Prerequisites = new ObservableCollection<Goal>(prerequisites);
+
     _goalEditing = goalEditing;
-
-    _ = _prerequisitesSource
-      .Connect()
-      .ObserveOn(RxApp.MainThreadScheduler)
-      .Bind(out _prerequisites)
-      .Subscribe();
-
-    _ = this.WhenAny(x => x.IsReached, isReached => isReached)
-      .Skip(1)
-      .Subscribe(AddIsReachedEdit);
-
-    static void AddIsReachedEdit(IObservedChange<Goal, bool> change)
-    {
-      GoalPath path = change.Sender.GetPath();
-      change.Sender._goalEditing.AddEdit(
-        new GoalEditIsReached(path, !change.Value),
-        new GoalEditIsReached(path, change.Value));
-    }
   }
 
   public GoalId Id { get; }
 
-  public bool IsReached
-  {
-    get => _isReached;
-    set => this.RaiseAndSetIfChanged(ref _isReached, value);
-  }
-  
-  public string Description
-  {
-    get => _description;
-    set => this.RaiseAndSetIfChanged(ref _description, value);
-  }
-
-  public ReadOnlyObservableCollection<Goal> Prerequisites => _prerequisites;
-
-  public Goal? Parent
-  {
-    get => _parent;
-    private set => this.RaiseAndSetIfChanged(ref _parent, value);
-  }
-
-  public bool IsEditing
-  {
-    get => _isEditing;
-    private set => this.RaiseAndSetIfChanged(ref _isEditing, value);
-  }
-
-  public bool IsExpanded
-  {
-    get => _isExpanded;
-    set => this.RaiseAndSetIfChanged(ref _isExpanded, value);
-  }
+  public ObservableCollection<Goal> Prerequisites { get; }
 
   public Goal GetRoot()
     => Parent?.GetRoot() ?? this;
@@ -100,7 +67,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
     => Parent is Goal parent
     ? parent.GetPath() + Id
     : GoalPath.Empty;
-  
+
   public Goal GetGoal(GoalPath path)
   {
     if (path.Path.Length == 0)
@@ -122,7 +89,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
     }
 
     prerequisite.Parent = this;
-    _prerequisitesSource.Insert(index, prerequisite);
+    Prerequisites.Insert(index, prerequisite);
   }
 
   public void AddPrerequisite(Goal prerequisite)
@@ -133,12 +100,12 @@ public sealed class Goal : ReactiveObject, IEditableObject
     }
 
     prerequisite.Parent = this;
-    _prerequisitesSource.Add(prerequisite);
+    Prerequisites.Add(prerequisite);
   }
 
   public bool RemovePrerequisite(Goal prerequisite)
   {
-    bool isRemoved = _prerequisitesSource.Remove(prerequisite);
+    bool isRemoved = Prerequisites.Remove(prerequisite);
 
     if (isRemoved)
     {
@@ -164,7 +131,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
     hash.Add(IsEditing);
     hash.Add(Description);
 
-    foreach(Goal prerequisite in Prerequisites)
+    foreach (Goal prerequisite in Prerequisites)
     {
       hash.Add(prerequisite);
     }
@@ -174,7 +141,7 @@ public sealed class Goal : ReactiveObject, IEditableObject
 
   private static char XIfTrue(bool value)
     => value ? 'x' : ' ';
-  
+
   public void BeginEdit()
   {
     if (_originalDescription is not null)

@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Reactive;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
@@ -35,11 +34,11 @@ public partial class GoalsUserControl : UserControl
 
       if (e.KeyModifiers == osKeyModifier)
       {
-        viewModel.Undo.Execute(Unit.Default);
+        viewModel.UndoCommand.Execute(null);
       }
       else if (e.KeyModifiers == (osKeyModifier | KeyModifiers.Shift))
       {
-        viewModel.Redo.Execute(Unit.Default);
+        viewModel.RedoCommand.Execute(null);
       }
     }
   }
@@ -75,12 +74,12 @@ public partial class GoalsUserControl : UserControl
 
         if (e.KeyModifiers == KeyModifiers.Shift)
         {
-          viewModel.AddNewPrerequisite.Execute("New task");
+          viewModel.AddNewPrerequisiteCommand.Execute("New task");
           e.Handled = true;
         }
         else
         {
-          viewModel.AddNewSiblingPrerequisite.Execute("New task");
+          viewModel.AddNewSiblingPrerequisiteCommand.Execute("New task");
           e.Handled = true;
         }
         break;

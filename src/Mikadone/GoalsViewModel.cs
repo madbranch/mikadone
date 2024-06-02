@@ -1,19 +1,21 @@
 using System;
-using System.Reactive;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Mikadone.GoalEdit;
-using ReactiveUI;
 
 namespace Mikadone;
 
-public class GoalsViewModel : ReactiveObject
+public partial class GoalsViewModel : ObservableObject
 {
+  [ObservableProperty]
+  [NotifyCanExecuteChangedFor(nameof(AddNewPrerequisiteCommand))]
+  [NotifyCanExecuteChangedFor(nameof(AddNewSiblingPrerequisiteCommand))]
   private Goal? _selectedGoal;
+
+  [ObservableProperty]
   private Goal _root;
-  private readonly ReactiveCommand<string, Goal?> _addNewPrerequisiteCommand;
-  private readonly ReactiveCommand<string, Goal?> _addNewSiblingPrerequisiteCommand;
-  private readonly ReactiveCommand<Unit, bool> _undoCommand;
-  private readonly ReactiveCommand<Unit, bool> _redoCommand;
+
   private readonly IRootGoalProvider _rootGoalProvider;
   private readonly IGoalFactory _goalFactory;
   private readonly IGoalEditing _goalEditing;
@@ -24,32 +26,17 @@ public class GoalsViewModel : ReactiveObject
     _goalFactory = goalFactory;
     _goalEditing = goalEditing;
     _root = _rootGoalProvider.GetRootGoal();
-    IObservable<bool> canExecuteAddNewPrerequisite = this.WhenAnyValue<GoalsViewModel, bool, Goal?>(x => x.SelectedGoal, x => x is not null);
-    _addNewPrerequisiteCommand = ReactiveCommand.Create<string, Goal?>(ExecuteAddNewPrerequisiteCommand, canExecuteAddNewPrerequisite);
-    _addNewSiblingPrerequisiteCommand = ReactiveCommand.Create<string, Goal?>(ExecuteAddNewSiblingPrerequisiteCommand, canExecuteAddNewPrerequisite);
-    _undoCommand = ReactiveCommand.Create<Unit, bool>(_ => _goalEditing.TryUndo(Root));
-    _redoCommand = ReactiveCommand.Create<Unit, bool>(_ => _goalEditing.TryRedo(Root));
   }
 
-  public Goal Root
-  {
-    get => _root;
-    set => this.RaiseAndSetIfChanged(ref _root, value);
-  }
+  private bool CanAddNewPrerequisite(string description)
+    => SelectedGoal is not null;
 
-  public Goal? SelectedGoal
-  {
-    get => _selectedGoal;
-    set => this.RaiseAndSetIfChanged(ref _selectedGoal, value);
-  }
-
-  public ICommand AddNewPrerequisite => _addNewPrerequisiteCommand;
-
-  private Goal? ExecuteAddNewPrerequisiteCommand(string description)
+  [RelayCommand(CanExecute = nameof(CanAddNewPrerequisite))]
+  private void AddNewPrerequisite(string description)
   {
     if (SelectedGoal is not Goal selectedGoal)
     {
-      return null;
+      return;
     }
 
     Goal newPrerequisite = _goalFactory.CreateGoal(false, description, []);
@@ -58,21 +45,23 @@ public class GoalsViewModel : ReactiveObject
     SelectedGoal = newPrerequisite;
     _goalEditing.AddEdit(undo: new GoalRemoval(newPrerequisite.GetPath()),
                          redo: new GoalInsertion(selectedGoal.GetPath(), newPrerequisite, selectedGoal.Prerequisites.Count - 1));
-    return newPrerequisite;
   }
 
-  public ICommand AddNewSiblingPrerequisite => _addNewSiblingPrerequisiteCommand;
+  [RelayCommand]
+  private void Undo()
+    => _goalEditing.TryUndo(Root);
 
-  public ICommand Undo => _undoCommand;
+  [RelayCommand]
+  private void Redo()
+    => _goalEditing.TryRedo(Root);
 
-  public ICommand Redo => _redoCommand;
-
-  private Goal? ExecuteAddNewSiblingPrerequisiteCommand(string description)
+  [RelayCommand(CanExecute = nameof(CanAddNewPrerequisite))]
+  private void AddNewSiblingPrerequisite(string description)
   {
     if (SelectedGoal is not Goal selectedGoal
       || selectedGoal.Parent is not Goal parent)
     {
-      return null;
+      return;
     }
 
     Goal newPrerequisite = _goalFactory.CreateGoal(false, description, []);
@@ -83,6 +72,5 @@ public class GoalsViewModel : ReactiveObject
     SelectedGoal = newPrerequisite;
     _goalEditing.AddEdit(undo: new GoalRemoval(newPrerequisite.GetPath()),
                          redo: new GoalInsertion(parent.GetPath(), newPrerequisite, newPrerequisiteIndex));
-    return null;
   }
 }

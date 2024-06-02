@@ -1,8 +1,8 @@
-﻿using ReactiveUI;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Mikadone;
 
-public class MainViewModel : ReactiveObject
+public class MainViewModel : ObservableObject
 {
   public MainViewModel(GoalsViewModel goals)
   {
