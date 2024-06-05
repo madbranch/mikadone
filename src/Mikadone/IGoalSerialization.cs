@@ -5,5 +5,4 @@ namespace Mikadone;
 public interface IGoalSerialization
 {
   Stream Serialize(Goal goal, Stream stream);
-  Goal? Deserialize(string jsonString);
 }

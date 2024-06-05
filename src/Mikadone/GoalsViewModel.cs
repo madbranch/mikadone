@@ -1,5 +1,3 @@
-using System;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mikadone.GoalEdit;
@@ -16,16 +14,17 @@ public partial class GoalsViewModel : ObservableObject
   [ObservableProperty]
   private Goal _root;
 
-  private readonly IRootGoalProvider _rootGoalProvider;
   private readonly IGoalFactory _goalFactory;
   private readonly IGoalEditing _goalEditing;
+  private readonly IGoalAutoSave _goalAutoSave;
 
-  public GoalsViewModel(IRootGoalProvider rootGoalProvider, IGoalFactory goalFactory, IGoalEditing goalEditing)
+  public GoalsViewModel(IRootGoalProvider rootGoalProvider, IGoalFactory goalFactory, IGoalEditing goalEditing, IGoalAutoSave goalAutoSave)
   {
-    _rootGoalProvider = rootGoalProvider;
     _goalFactory = goalFactory;
     _goalEditing = goalEditing;
-    _root = _rootGoalProvider.GetRootGoal();
+    _goalAutoSave = goalAutoSave;
+
+    _root = rootGoalProvider.Root;
   }
 
   private bool CanAddNewPrerequisite(string description)
@@ -45,15 +44,26 @@ public partial class GoalsViewModel : ObservableObject
     SelectedGoal = newPrerequisite;
     _goalEditing.AddEdit(undo: new GoalRemoval(newPrerequisite.GetPath()),
                          redo: new GoalInsertion(selectedGoal.GetPath(), newPrerequisite, selectedGoal.Prerequisites.Count - 1));
+    _goalAutoSave.Save(Root);
   }
 
   [RelayCommand]
   private void Undo()
-    => _goalEditing.TryUndo(Root);
+  {
+    if (_goalEditing.TryUndo(Root))
+    {
+      _goalAutoSave.Save(Root);
+    }
+  }
 
   [RelayCommand]
   private void Redo()
-    => _goalEditing.TryRedo(Root);
+  {
+    if (_goalEditing.TryRedo(Root))
+    {
+      _goalAutoSave.Save(Root);
+    }
+  }
 
   [RelayCommand(CanExecute = nameof(CanAddNewPrerequisite))]
   private void AddNewSiblingPrerequisite(string description)
@@ -72,5 +82,6 @@ public partial class GoalsViewModel : ObservableObject
     SelectedGoal = newPrerequisite;
     _goalEditing.AddEdit(undo: new GoalRemoval(newPrerequisite.GetPath()),
                          redo: new GoalInsertion(parent.GetPath(), newPrerequisite, newPrerequisiteIndex));
+    _goalAutoSave.Save(Root);
   }
 }

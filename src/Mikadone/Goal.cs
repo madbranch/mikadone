@@ -25,6 +25,7 @@ public sealed partial class Goal : ObservableObject, IEditableObject
     _goalEditing.AddEdit(
       new GoalEditIsReached(path, oldValue),
       new GoalEditIsReached(path, newValue));
+    _goalAutoSave.Save(GetRoot());
   }
 
   [ObservableProperty]
@@ -34,18 +35,22 @@ public sealed partial class Goal : ObservableObject, IEditableObject
   private bool _isExpanded = true;
 
   private readonly IGoalEditing _goalEditing;
+  private readonly IGoalAutoSave _goalAutoSave;
   private string? _originalDescription;
 
   public Goal(GoalId id,
               bool isReached,
               string description,
               IEnumerable<Goal> prerequisites,
-              IGoalEditing goalEditing)
+              IGoalEditing goalEditing,
+              IGoalAutoSave goalAutoSave)
   {
     Id = id;
     _isReached = isReached;
     _description = description;
     _goalEditing = goalEditing;
+    _goalAutoSave = goalAutoSave;
+
     foreach (Goal prerequisite in prerequisites)
     {
       prerequisite.Parent = this;
@@ -181,5 +186,6 @@ public sealed partial class Goal : ObservableObject, IEditableObject
 
     _originalDescription = null;
     IsEditing = false;
+    _goalAutoSave.Save(GetRoot());
   }
 }

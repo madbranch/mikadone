@@ -12,14 +12,16 @@ public class GoalTests
   public void Serialization()
   {
     IGoalEditing goalEditing = Substitute.For<IGoalEditing>();
-    GoalFactory goalFactory = new(new GoalIdProvider(), goalEditing);
-    Goal root = new(new GoalId(0), false, string.Empty, [], goalEditing);
-    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", [], goalEditing));
-    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", [], goalEditing));
-    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", [], goalEditing) );
-    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", [], goalEditing));
+    IGoalAutoSave goalAutoSave = Substitute.For<IGoalAutoSave>();
+    GoalFactory goalFactory = new(new GoalIdProvider(), goalEditing, goalAutoSave);
+    Goal root = new(new GoalId(0), false, string.Empty, [], goalEditing, goalAutoSave);
+    root.AddPrerequisite(new Goal( new GoalId(1), false, "Oh yeah", [], goalEditing, goalAutoSave));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(2), false, "Meh", [], goalEditing, goalAutoSave));
+    root.Prerequisites[0].AddPrerequisite(new Goal(new GoalId(3), false, "Huh", [], goalEditing, goalAutoSave) );
+    root.AddPrerequisite(new Goal(new GoalId(4), true, "Oh no", [], goalEditing, goalAutoSave));
 
-    GoalSerialization goalSerialization = new(goalFactory);
+    GoalSerialization goalSerialization = new();
+    GoalDeserialization goalDeserialization = new(goalFactory);
 
     using MemoryStream stream = new();
     
@@ -27,7 +29,7 @@ public class GoalTests
 
     string json = Encoding.UTF8.GetString(stream.ToArray());
 
-    Goal deserializedRoot = goalSerialization.Deserialize(json)!;
+    Goal deserializedRoot = goalDeserialization.Deserialize(json)!;
 
     deserializedRoot.Should().Be(root);
   }

@@ -2,5 +2,5 @@ namespace Mikadone;
 
 public interface IRootGoalProvider
 {
-  Goal GetRootGoal();
+  Goal Root { get; }
 }
