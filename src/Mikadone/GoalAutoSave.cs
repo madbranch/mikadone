@@ -19,7 +19,11 @@ public class GoalAutoSave : IGoalAutoSave
   }
 
   public void Save(Goal root)
-    => _goalSerialization.Serialize(root, GetStream());
+  {
+    using Stream stream = GetStream();
+    _goalSerialization.Serialize(root, stream);
+  }
+
 
   private Stream GetStream()
     => _goalStorage.OpenWrite(_goalFileNameProvider.FileName);
