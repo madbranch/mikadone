@@ -25,6 +25,6 @@
   </ItemGroup>
   <Target Name="Format XAML" AfterTargets="BeforeBuild">
     <Exec Command="dotnet tool restore" />
-    <Exec Command="dotnet xstyler -i -f &quot;@(FilesToFormat, ',')&quot; -c &quot;$(SolutionDir)Settings.XamlStyler.json&quot;" />
+    <Exec Command="dotnet xstyler -i -f &quot;@(FilesToFormat, ',')&quot; -c &quot;$(ProjectDir)../../Settings.XamlStyler.json&quot;" />
   </Target>
 </Project>
