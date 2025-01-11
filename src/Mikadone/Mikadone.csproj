@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
     <FilesToFormat Include="**/*.axaml" />
   </ItemGroup>
@@ -25,6 +24,6 @@
   </ItemGroup>
   <Target Name="Format XAML" AfterTargets="BeforeBuild">
     <Exec Command="dotnet tool restore" />
-    <Exec Command="dotnet xstyler -i -f &quot;@(FilesToFormat, ',')&quot; -c &quot;$(ProjectDir)../../Settings.XamlStyler.json&quot;" />
+    <Exec Command="dotnet xstyler -i -f &quot;@(FilesToFormat, ',')&quot; -c &quot;$(ProjectDir)../../Settings.XamlStyler&quot;" />
   </Target>
 </Project>

@@ -71,7 +71,12 @@ public partial class GoalsViewModel : ObservableObject
     if (SelectedGoal is not Goal selectedGoal
       || selectedGoal.Parent is not Goal parent)
     {
-      return;
+      if (Root.Prerequisites.Count > 1)
+      {
+        return;
+      }
+
+      selectedGoal
     }
 
     Goal newPrerequisite = _goalFactory.CreateGoal(false, description, []);
